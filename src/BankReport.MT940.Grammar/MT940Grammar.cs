@@ -92,14 +92,23 @@ public class MT940Grammar : BankGrammar
             Description1 = subtagsDictionary.TryGetValue("+21", out var d1) ? d1.Trim() : null,
             Description2 = subtagsDictionary.TryGetValue("+20", out var d20) ? d20.Trim() : subtagsDictionary.TryGetValue("+22", out var d22) ? d22.Trim() : null,
 
-            CustomerName = subtagsDictionary.TryGetValue("+32", out var cName32) ? string.IsNullOrWhiteSpace(cName32)
-                                                                                    ? (subtagsDictionary.TryGetValue("+30", out var cName30) ? cName30.Trim() : null)
-                                                                                    : cName32.Trim() : null,
+            CustomerName = GetCustomerName(subtagsDictionary);
 
             CustomerBranchCode = subtagsDictionary.TryGetValue("+30", out var bCode) ? bCode.Trim() : null,
             CustomerIban = subtagsDictionary.TryGetValue("+31", out var cIban) ? cIban.Trim() : null,
             CustomerBankName = subtagsDictionary.TryGetValue("+33", out var bName) ? bName.Trim() : null,
         };
+        
+    private static string? GetCustomerName(Dictionary<string, string> subtagsDictionary)
+    {
+        subtagsDictionary.TryGetValue("+32", out string customerName);
+        if (string.IsNullOrWhiteSpace(customerName))
+        {
+            subtagsDictionary.TryGetValue("+30", out customerName);
+        }
+
+        return customerName?.Trim();
+    }
 
     private static readonly Parser<MT940SummaryDto> Summary =
         from startToken in BeforeStartAfterStatementEnd
